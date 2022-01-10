@@ -10,8 +10,9 @@ def get_pdf_list_from_sf_log(siegfried_log_path):
     with open(siegfried_log_path, "r") as sf_log:
         for line in sf_log:
             sf_file_json = json.loads(line)
-            if sf_file_json["files"][0]["matches"][0]["format"] == "Acrobat PDF":
-                pdf_list.append(sf_file_json["files"][0]["filename"])
+            for f in sf_file_json["files"]:
+                if "Acrobat PDF" in f["matches"][0]["format"]:
+                    pdf_list.append(f["filename"])
     return pdf_list
 
 
