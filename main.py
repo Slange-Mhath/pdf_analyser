@@ -7,12 +7,15 @@ from argparse import ArgumentParser
 
 def get_pdf_list_from_sf_log(siegfried_log_path):
     pdf_list = []
+    counter = 0
     with open(siegfried_log_path, "r") as sf_log:
         for line in sf_log:
             sf_file_json = json.loads(line)
             for f in sf_file_json["files"]:
+                counter += 1
                 if "Acrobat PDF" in f["matches"][0]["format"]:
                     pdf_list.append(f["filename"])
+                print("{} files of the siegfried log file {} processed.".format(counter, siegfried_log_path))
     return pdf_list
 
 
@@ -29,7 +32,6 @@ def identify_image(pdf_file):
 def create_pdf_info(pdf):
     pdf_info = {pdf: identify_image(pdf)}
     pdf_info[pdf].update({"tool_version_info": fitz.__doc__})
-    print(pdf_info)
     return pdf_info
 
 
