@@ -44,8 +44,9 @@ def main(siegfried_log_path, output_file):
     pdf_list = get_pdf_list_from_sf_log(siegfried_log_path)
     pdf_infos = {}
     for pdf in pdf_list:
-        if create_pdf_info(pdf):
-            pdf_infos.update(create_pdf_info(pdf))
+        pdf_info = create_pdf_info(pdf)
+        if pdf_info:
+            pdf_infos.update(pdf_info)
             counter += 1
             print("{} files of the siegfried log file {} processed.".format(
                 counter, siegfried_log_path))
