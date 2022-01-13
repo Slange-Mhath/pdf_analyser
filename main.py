@@ -48,8 +48,8 @@ def main(siegfried_log_path, output_file):
         if pdf_info:
             pdf_infos.update(pdf_info)
             counter += 1
-            print("{} files of the siegfried log file {} processed.".format(
-                counter, siegfried_log_path))
+            print("{} files processed, finishing with the file {}.".format(
+                counter, pdf))
         else:
             print("The file {} has not returned any information, make sure that its not corrupted and opened properly with fitz.".format(pdf))
 
