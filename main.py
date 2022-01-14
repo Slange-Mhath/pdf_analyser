@@ -2,6 +2,7 @@ import fitz
 import json
 from argparse import ArgumentParser
 
+
 # https://pymupdf.readthedocs.io/en/latest/page.html#Page.get_text
 
 
@@ -17,13 +18,16 @@ def get_pdf_list_from_sf_log(siegfried_log_path):
 
 
 def identify_image(pdf_file):
-    doc = fitz.open(pdf_file)
-    for page in doc:
-        if page.get_text():
-            return {"isText": True}
-        else:
-            return {"isText": False}
-    doc.close()
+    try:
+        doc = fitz.open(pdf_file)
+        for page in doc:
+            if page.get_text():
+                return {"isText": True}
+            else:
+                return {"isText": False}
+        doc.close()
+    except RuntimeError:
+        print("{} was not opened properly and can't be identified".format(pdf_file))
 
 
 def create_pdf_info(pdf):
@@ -34,7 +38,8 @@ def create_pdf_info(pdf):
 
 
 def write_pdf_analyser_log(pdf_infos, output_file):
-    output = open(output_file, "w", encoding="utf-8") #Todo: add timestamp to the filename and or the sf_log_name
+    output = open(output_file, "w",
+                  encoding="utf-8")  # Todo: add timestamp to the filename and or the sf_log_name
     json.dump(pdf_infos, output, sort_keys=True, ensure_ascii=True)
     output.write("\n")
 
@@ -51,7 +56,9 @@ def main(siegfried_log_path, output_file):
             print("{} files processed, finishing with the file {}.".format(
                 counter, pdf))
         else:
-            print("The file {} has not returned any information, make sure that its not corrupted and opened properly with fitz.".format(pdf))
+            print(
+                "The file {} has not returned any information, make sure that its not corrupted and opened properly with fitz.".format(
+                    pdf))
 
     write_pdf_analyser_log(pdf_infos, output_file)
 
