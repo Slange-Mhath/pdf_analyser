@@ -6,6 +6,7 @@ from argparse import ArgumentParser
 # https://pymupdf.readthedocs.io/en/latest/page.html#Page.get_text
 
 
+# Todo: If pdf list is empty print out warning that there is no entry with Acrobat PDF in sf log
 def get_pdf_list_from_sf_log(siegfried_log_path):
     pdf_list = []
     with open(siegfried_log_path, "r") as sf_log:
@@ -14,6 +15,8 @@ def get_pdf_list_from_sf_log(siegfried_log_path):
             for f in sf_file_json["files"]:
                 if "Acrobat PDF" in f["matches"][0]["format"]:
                     pdf_list.append(f["filename"])
+    if not pdf_list:
+        print("It seems like there is no file with the format 'Acrobat PDF' in the siegfried log")
     return pdf_list
 
 
@@ -28,6 +31,8 @@ def identify_image(pdf_file):
         doc.close()
     except RuntimeError:
         print("{} was not opened properly and can't be identified".format(pdf_file))
+    except ValueError:
+        print("{} seems to be an encrypted file and can't be identified".format(pdf_file))
 
 
 def create_pdf_info(pdf):
