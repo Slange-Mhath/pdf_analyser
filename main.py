@@ -1,5 +1,6 @@
 import fitz
 import json
+import re
 from argparse import ArgumentParser
 
 
@@ -16,35 +17,96 @@ def get_pdf_list_from_sf_log(siegfried_log_path):
                 if "Acrobat PDF" in f["matches"][0]["format"]:
                     pdf_list.append(f["filename"])
     if not pdf_list:
-        print("It seems like there is no file with the format 'Acrobat PDF' in the siegfried log")
+        print(
+            "It seems like there is no file with the format 'Acrobat PDF' in the siegfried log")
     return pdf_list
 
 
-def identify_image(pdf_file):
+def get_font_list(pdf_file):
+    try:
+        doc = fitz.open(pdf_file)
+        list_of_fonts = []
+        list_of_unique_fonts = []
+        cleaned_font_infos = []
+        for page in doc:
+            fonts_on_page = page.get_fonts()
+            list_of_fonts.extend(fonts_on_page)
+            list_of_unique_fonts = list(set(list_of_fonts) | set(fonts_on_page))
+        for font in list_of_unique_fonts:
+            cleaned_font_infos.append(clear_font_info(font))
+        return cleaned_font_infos
+    except RuntimeError:
+        print("{} was not opened properly and can't be identified".format(
+            pdf_file))
+    except ValueError:
+        print("{} seems to be an encrypted file and can't be identified".format(
+            pdf_file))
+
+
+def clear_font_info(font):
+    font_info = {'font-name': delete_junk_chars(font[3])}
+    font_info.update({'font-no': font[0]})
+    font_info.update({'PostScript-type': font[2]})
+    font_info.update({'is_embedded': is_embedded(font[3])})
+    return font_info
+
+
+def is_embedded(font_name):
+    split_name = re.split(r'\+', font_name)
+    if len(split_name) > 1:
+        return False
+    else:
+        return True
+
+
+def delete_junk_chars(font_name):
+    # Todo: What if there is a plus in the font name?
+    split_name = re.split(r'\+',font_name)
+    if len(split_name) > 1:
+        cleaned_font_name = split_name[1]
+        return cleaned_font_name
+    else:
+        return split_name[0]
+
+
+def get_word_count(pdf):
+    list_of_words = []
+    try:
+        doc = fitz.open(pdf)
+        for page in doc:
+            words = page.get_text('words')
+            list_of_words.extend(words)
+        return len(list_of_words)
+    except RuntimeError:
+        print("{} was not opened properly and can't be identified".format(
+            pdf))
+    except ValueError:
+        print("{} seems to be an encrypted file and can't be identified".format(
+            pdf))
+
+
+def is_image(pdf_file):
     try:
         doc = fitz.open(pdf_file)
         for page in doc:
             if page.get_text():
-                return {"isText": True}
+                return False
             else:
-                return {"isText": False}
+                return True
         doc.close()
     except RuntimeError:
-        print("{} was not opened properly and can't be identified".format(pdf_file))
+        print("{} was not opened properly and can't be identified".format(
+            pdf_file))
+        return "Error"
     except ValueError:
-        print("{} seems to be an encrypted file and can't be identified".format(pdf_file))
-
-
-def create_pdf_info(pdf):
-    if identify_image(pdf):
-        pdf_info = {pdf: identify_image(pdf)}
-        pdf_info[pdf].update({"tool_version_info": fitz.__doc__})
-        return pdf_info
+        print("{} seems to be an encrypted file and can't be identified".format(
+            pdf_file))
+        return "Error"
 
 
 def write_pdf_analyser_log(pdf_infos, output_file):
     output = open(output_file, "w",
-                  encoding="utf-8")  # Todo: add timestamp to the filename and or the sf_log_name
+                  encoding="utf-8")  # Todo: add timestamp to the filename and or the sf_log_name and json ending
     json.dump(pdf_infos, output, sort_keys=True, ensure_ascii=True)
     output.write("\n")
 
@@ -54,18 +116,21 @@ def main(siegfried_log_path, output_file):
     pdf_list = get_pdf_list_from_sf_log(siegfried_log_path)
     pdf_infos = {}
     for pdf in pdf_list:
-        pdf_info = create_pdf_info(pdf)
-        if pdf_info:
-            pdf_infos.update(pdf_info)
-            counter += 1
-            print("{} files processed, finishing with the file {}.".format(
-                counter, pdf))
+        counter +=1
+        print(f"{counter} pdf files processed")
+        if is_image(pdf) == "Error":
+            continue
+        elif is_image(pdf) is not True:
+            pdf_infos[pdf] = {"isImage": False}
+            pdf_infos[pdf].update({"word_count": get_word_count(pdf)})
+            pdf_infos[pdf].update({"list_of_fonts": get_font_list(pdf)})
         else:
-            print(
-                "The file {} has not returned any information, make sure that its not corrupted and opened properly with fitz.".format(
-                    pdf))
+            pdf_infos[pdf] = {"isImage": True}
 
     write_pdf_analyser_log(pdf_infos, output_file)
+
+
+#Todo: Write Clean up method and find out what exactly junk chars indicate. How embedded fonts look
 
 
 if __name__ == "__main__":
