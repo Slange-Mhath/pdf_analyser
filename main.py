@@ -124,8 +124,10 @@ def main(siegfried_log_path, output_file):
             pdf_infos[pdf] = {"isImage": False}
             pdf_infos[pdf].update({"word_count": get_word_count(pdf)})
             pdf_infos[pdf].update({"list_of_fonts": get_font_list(pdf)})
+            pdf_infos[pdf].update({"tool_version_info": fitz.__doc__})
         else:
             pdf_infos[pdf] = {"isImage": True}
+            pdf_infos[pdf].update({"tool_version_info": fitz.__doc__}) # TODO: I should fix that duplicate from l. 127, however, if I put that outside the if statement I get a key error.
 
     write_pdf_analyser_log(pdf_infos, output_file)
 
