@@ -58,8 +58,8 @@ def test_get_font_list(test_image_pdf, test_pdf):
 
 
 def test_is_embedded(list_of_fonts):
-    embedded_font = list_of_fonts[2]
-    unembedded_font = list_of_fonts[1]
+    embedded_font = list_of_fonts[1]
+    unembedded_font = list_of_fonts[2]
     assert is_embedded(embedded_font[3]) is True
     assert is_embedded(unembedded_font[3]) is False
 
@@ -73,7 +73,7 @@ def test_clear_font_info(list_of_fonts):
     cleared_fonts = []
     for font in list_of_fonts:
         cleared_fonts.append(clear_font_info(font))
-    assert cleared_fonts[0] == {'font-name': 'DokChampa', 'font-no': 11, 'PostScript-type': 'TrueType', 'is_embedded': False}
+    assert cleared_fonts[0] == {'font-name': 'DokChampa', 'font-no': 11, 'PostScript-type': 'TrueType', 'is_embedded': True}
 
 
 

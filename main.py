@@ -52,11 +52,12 @@ def clear_font_info(font):
 
 
 def is_embedded(font_name):
+    print(font_name)
     split_name = re.split(r'\+', font_name)
     if len(split_name) > 1:
-        return False
-    else:
         return True
+    else:
+        return False
 
 
 def delete_junk_chars(font_name):
