@@ -52,7 +52,6 @@ def clear_font_info(font):
 
 
 def is_embedded(font_name):
-    print(font_name)
     split_name = re.split(r'\+', font_name)
     if len(split_name) > 1:
         return True
@@ -93,8 +92,8 @@ def is_image(pdf_file):
             if page.get_text():
                 return False
             else:
-                return True
-        doc.close()
+                continue
+        return True
     except RuntimeError:
         print("{} was not opened properly and can't be identified".format(
             pdf_file))
@@ -112,6 +111,24 @@ def write_pdf_analyser_log(pdf_infos, output_file):
     output.write("\n")
 
 
+def get_image_count(pdf):
+    try:
+        doc = fitz.open(pdf)
+        images_in_doc = []
+        for page in doc:
+            images_in_page = page.get_images()
+            images_in_doc.extend(images_in_page)
+        return len(images_in_doc)
+    except RuntimeError:
+        print("{} was not opened properly and can't be identified".format(
+        pdf))
+        return "Error"
+    except ValueError:
+        print("{} seems to be an encrypted file and can't be identified".format(
+        pdf))
+        return "Error"
+
+
 def main(siegfried_log_path, output_file):
     counter = 0
     pdf_list = get_pdf_list_from_sf_log(siegfried_log_path)
@@ -124,12 +141,13 @@ def main(siegfried_log_path, output_file):
         elif is_image(pdf) is not True:
             pdf_infos[pdf] = {"isImage": False}
             pdf_infos[pdf].update({"word_count": get_word_count(pdf)})
+            pdf_infos[pdf].update({"image_count": get_image_count(pdf)})
             pdf_infos[pdf].update({"list_of_fonts": get_font_list(pdf)})
             pdf_infos[pdf].update({"tool_version_info": fitz.__doc__})
         else:
             pdf_infos[pdf] = {"isImage": True}
             pdf_infos[pdf].update({"tool_version_info": fitz.__doc__}) # TODO: I should fix that duplicate from l. 127, however, if I put that outside the if statement I get a key error.
-
+    print(pdf_infos)
     write_pdf_analyser_log(pdf_infos, output_file)
 
 
