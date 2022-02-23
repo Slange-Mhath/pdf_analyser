@@ -1,5 +1,5 @@
 import pytest
-from main import get_pdf_list_from_sf_log, get_word_count, is_image, get_font_list, is_embedded, delete_junk_chars, clear_font_info
+from main import get_pdf_list_from_sf_log, get_word_count, is_image, get_font_list, is_embedded, delete_junk_chars, clear_font_info, get_image_count
 import json
 import re
 
@@ -12,7 +12,7 @@ def test_sf_log():
 
 @pytest.fixture()
 def test_pdf():
-    pdf_file = "tests/test_files/24_words.pdf"
+    pdf_file = "tests/test_files/4_img_in_pdf.pdf"
     return pdf_file
 
 
@@ -57,7 +57,9 @@ def test_get_font_list(test_image_pdf, test_pdf):
     assert len(font_list) == 3
 
 
-def test_is_embedded(list_of_fonts):
+def test_is_embedded(list_of_fonts, test_pdf):
+    font_list = get_font_list(test_pdf)
+    print(font_list)
     embedded_font = list_of_fonts[1]
     unembedded_font = list_of_fonts[2]
     assert is_embedded(embedded_font[3]) is True
@@ -75,6 +77,10 @@ def test_clear_font_info(list_of_fonts):
         cleared_fonts.append(clear_font_info(font))
     assert cleared_fonts[0] == {'font-name': 'DokChampa', 'font-no': 11, 'PostScript-type': 'TrueType', 'is_embedded': True}
 
+
+def test_get_image_count(test_pdf):
+    image_count = get_image_count(test_pdf)
+    assert image_count is 4
 
 
 
