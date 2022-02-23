@@ -129,6 +129,20 @@ def get_image_count(pdf):
         return "Error"
 
 
+def get_page_count(pdf):
+    try:
+        doc = fitz.open(pdf)
+        return doc.page_count
+    except RuntimeError:
+        print("{} was not opened properly and can't be identified".format(
+            pdf))
+        return "Error"
+    except ValueError:
+        print("{} seems to be an encrypted file and can't be identified".format(
+            pdf))
+        return "Error"
+
+
 def main(siegfried_log_path, output_file):
     counter = 0
     pdf_list = get_pdf_list_from_sf_log(siegfried_log_path)
@@ -143,11 +157,12 @@ def main(siegfried_log_path, output_file):
             pdf_infos[pdf].update({"word_count": get_word_count(pdf)})
             pdf_infos[pdf].update({"image_count": get_image_count(pdf)})
             pdf_infos[pdf].update({"list_of_fonts": get_font_list(pdf)})
+            pdf_infos[pdf].update({"page_count": get_page_count(pdf)})
             pdf_infos[pdf].update({"tool_version_info": fitz.__doc__})
+
         else:
             pdf_infos[pdf] = {"isImage": True}
             pdf_infos[pdf].update({"tool_version_info": fitz.__doc__}) # TODO: I should fix that duplicate from l. 127, however, if I put that outside the if statement I get a key error.
-    print(pdf_infos)
     write_pdf_analyser_log(pdf_infos, output_file)
 
 
