@@ -1,5 +1,5 @@
 import pytest
-from main import get_pdf_list_from_sf_log, get_word_count, is_image, get_font_list, is_embedded, delete_junk_chars, clear_font_info, get_image_count
+from main import get_pdf_list_from_sf_log, get_word_count, is_image, get_font_list, is_embedded, delete_junk_chars, clear_font_info, get_image_count, get_pdf_title
 import json
 import re
 
@@ -82,6 +82,10 @@ def test_get_image_count(test_pdf):
     image_count = get_image_count(test_pdf)
     assert image_count is 4
 
+
+def test_get_pdf_title(test_pdf):
+    title = get_pdf_title(test_pdf)
+    print(title)
 
 
 
