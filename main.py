@@ -163,6 +163,16 @@ def get_pdf_title(pdf):
         return "Error"
 
 
+def has_pdf_forms(pdf):
+    doc = fitz.open(pdf)
+    for page in doc:
+        if page.first_widget:
+            return True
+        else:
+            return False
+
+
+
 
 def main(siegfried_log_path, output_file):
     counter = 0
@@ -181,6 +191,7 @@ def main(siegfried_log_path, output_file):
             pdf_infos[pdf].update({"page_count": get_page_count(pdf)})
             pdf_infos[pdf].update({"tool_version_info": fitz.__doc__})
             pdf_infos[pdf].update({"pdf_title": get_pdf_title(pdf)})
+            pdf_infos[pdf].update({"containsForms": has_pdf_forms(pdf)})
 
         else:
             pdf_infos[pdf] = {"isImage": True}
