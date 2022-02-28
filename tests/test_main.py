@@ -1,8 +1,8 @@
 import pytest
 from main import get_pdf_list_from_sf_log, get_word_count, is_image,\
-    get_font_list, is_embedded, delete_junk_chars, clear_font_info, get_image_count, get_pdf_title, has_pdf_forms
+    get_font_list, is_embedded, delete_junk_chars, clear_font_info, \
+    get_image_count, get_pdf_title, has_pdf_forms, has_bookmarks
 import json
-import re
 
 
 @pytest.fixture()
@@ -13,7 +13,7 @@ def test_sf_log():
 
 @pytest.fixture()
 def test_pdf():
-    pdf_file = "tests/test_files/indesign-pdf.pdf"
+    pdf_file = "tests/test_files/2_img_in_pdf.pdf"
     return pdf_file
 
 
@@ -87,6 +87,18 @@ def test_get_image_count(test_pdf):
 def test_get_pdf_title(test_pdf):
     title = get_pdf_title(test_pdf)
     print(title)
+    if test_pdf == 'tests/test_files/2_img_in_pdf.pdf':
+        assert title is None
+    else:
+        assert title is not None
+
+
+def test_has_bookmarks(test_pdf):
+    contains_bookmarks = has_bookmarks(test_pdf)
+    if test_pdf == 'tests/test_files/pdf-example-bookmarks.pdf':
+        assert contains_bookmarks is True
+    else:
+        assert contains_bookmarks is False
 
 
 def test_get_pdf_forms(test_pdf):

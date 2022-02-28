@@ -164,14 +164,39 @@ def get_pdf_title(pdf):
 
 
 def has_pdf_forms(pdf):
-    doc = fitz.open(pdf)
-    for page in doc:
-        if page.first_widget:
+    try:
+        doc = fitz.open(pdf)
+        for page in doc:
+            if page.first_widget:
+                return True
+            else:
+                return False
+    except RuntimeError:
+        print("{} was not opened properly and can't be identified".format(
+            pdf))
+        return "Error"
+    except ValueError:
+        print("{} seems to be an encrypted file and can't be identified".format(
+            pdf))
+        return "Error"
+
+
+def has_bookmarks(pdf):
+    try:
+        doc = fitz.open(pdf)
+        toc = doc.get_toc()
+        if toc:
             return True
         else:
             return False
-
-
+    except RuntimeError:
+        print("{} was not opened properly and can't be identified".format(
+            pdf))
+        return "Error"
+    except ValueError:
+        print("{} seems to be an encrypted file and can't be identified".format(
+            pdf))
+        return "Error"
 
 
 def main(siegfried_log_path, output_file):
