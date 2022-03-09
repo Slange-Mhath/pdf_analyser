@@ -166,6 +166,7 @@ def get_pdf_title(pdf):
 def has_pdf_forms(pdf):
     try:
         doc = fitz.open(pdf)
+        print(f" The file {pdf} was checked on forms")
         for page in doc:
             if page.first_widget:
                 return True
@@ -221,7 +222,6 @@ def main(siegfried_log_path, output_file):
         else:
             pdf_infos[pdf] = {"isImage": True}
             pdf_infos[pdf].update({"tool_version_info": fitz.__doc__}) # TODO: I should fix that duplicate from l. 127, however, if I put that outside the if statement I get a key error.
-    print(pdf_infos)
     write_pdf_analyser_log(pdf_infos, output_file)
 
 
